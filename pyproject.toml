@@ -1,0 +1,14 @@
+[project]
+name = "comfyui-lmstudio-image-to-text-node"
+description = "A custom node for ComfyUI that integrates LM Studio's vision models to generate text descriptions of images. It provides a flexible and customizable way to add image-to-text capabilities to your ComfyUI workflows, working with LM Studio's local API."
+version = "1.0.1"
+license = "LICENSE"
+
+[project.urls]
+Repository = "https://github.com/mattjohnpowell/comfyui-lmstudio-image-to-text-node"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "expo"
+DisplayName = "comfyui-lmstudio-image-to-text-node"
+Icon = "https://uuhwiahvfvrzsenphewc.supabase.co/storage/v1/object/public/phormulate-media-bucket/lmstudio-comfyui.png"
