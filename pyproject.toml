@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-lmstudio-image-to-text-node"
 description = "A custom node for ComfyUI that integrates LM Studio's vision models to generate text descriptions of images. It provides a flexible and customizable way to add image-to-text capabilities to your ComfyUI workflows, working with LM Studio's local API."
-version = "1.0.1"
+version = "1.0.2"
 license = "LICENSE"
 
 [project.urls]
