@@ -16,6 +16,7 @@ import json
 import numpy as np
 from PIL import Image
 import io
+import random
 
 class ExpoLmstudioImageToText:
     @classmethod
@@ -28,6 +29,7 @@ class ExpoLmstudioImageToText:
                 "system_prompt": ("STRING", {"default": "This is a chat between a user and an assistant. The assistant is an expert in describing images, with detail and accuracy"}),
                 "ip_address": ("STRING", {"default": "localhost"}),
                 "port": ("INT", {"default": 1234, "min": 1, "max": 65535}),
+                "seed": ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff}),
             },
             "optional": {
                 "debug": ("BOOLEAN", {"default": False}),
@@ -39,7 +41,10 @@ class ExpoLmstudioImageToText:
     FUNCTION = "process_image"
     CATEGORY = "ComfyExpo/I2T"
 
-    def process_image(self, image, user_prompt, model, system_prompt, ip_address, port, debug=False):
+    def process_image(self, image, user_prompt, model, system_prompt, ip_address, port, seed, debug=False):
+        if seed == -1:
+            seed = random.randint(0, 0xffffffffffffffff)
+        random.seed(seed)
         if debug:
             print(f"Debug: Starting process_image method")
             print(f"Debug: Text input: {user_prompt}")
@@ -72,7 +77,8 @@ class ExpoLmstudioImageToText:
                     ]}
                 ],
                 "max_tokens": 1000,
-                "stream": False
+                "stream": False,
+                "seed": seed
             }
 
             if debug:
@@ -124,6 +130,7 @@ class ExpoLmstudioTextGeneration:
                 "system_prompt": ("STRING", {"default": "You are a helpful AI assistant."}),
                 "ip_address": ("STRING", {"default": "localhost"}),
                 "port": ("INT", {"default": 1234, "min": 1, "max": 65535}),
+                "seed": ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff}),
             },
             "optional": {
                 "max_tokens": ("INT", {"default": 1000, "min": 1, "max": 4096}),
@@ -137,7 +144,11 @@ class ExpoLmstudioTextGeneration:
     FUNCTION = "generate_text"
     CATEGORY = "ComfyExpo/Text"
 
-    def generate_text(self, prompt, model, system_prompt, ip_address, port, max_tokens=1000, temperature=0.7, debug=False):
+    def generate_text(self, prompt, model, system_prompt, ip_address, port, seed, max_tokens=1000, temperature=0.7, debug=False):
+        if seed == -1:
+            seed = random.randint(0, 0xffffffffffffffff)
+        random.seed(seed)
+
         if debug:
             print(f"Debug: Starting generate_text method")
             print(f"Debug: Prompt: {prompt}")
@@ -157,7 +168,8 @@ class ExpoLmstudioTextGeneration:
                 ],
                 "max_tokens": max_tokens,
                 "temperature": temperature,
-                "stream": False
+                "stream": False,
+                "seed": seed
             }
 
             if debug:
