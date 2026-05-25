@@ -20,6 +20,7 @@ import tempfile
 import hashlib
 import random
 import concurrent.futures
+import re
 
 _ENV_API_TOKEN = "LM_API_TOKEN"
 api_token = os.environ.get(_ENV_API_TOKEN, "lm-studio")
@@ -38,6 +39,19 @@ DEFAULT_VISION = "qwen/qwen3-vl-8b"
 # lmstudio imported above in a try/except; keep lms as None when unavailable
 
 # No longer checking SDK compatibility
+
+# --- Helper function to strip <think>...</think> blocks from model responses ---
+def strip_thinking_tags(text):
+    """
+    Remove <think>...</think> blocks produced by reasoning/thinking-mode models
+    (e.g. Qwen3, DeepSeek-R1, and abliterated variants).  The tags are matched
+    case-insensitively and across multiple lines so that the full chain-of-thought
+    section is removed regardless of how the model formats it.
+    Returns the cleaned text with leading/trailing whitespace stripped.
+    """
+    cleaned = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL | re.IGNORECASE)
+    return cleaned.strip()
+
 
 # --- Helper function to get model info with fallback ---
 def get_model_info_with_fallback(model_key, debug=False):
@@ -329,8 +343,10 @@ class ExpoLmstudioUnified:
 
                 result = model.respond(chat, config=config)
 
+                output_text = strip_thinking_tags(result.content)
+
                 if debug:
-                    print(f"Debug: Response received: {result.content[:100]}...")  # Print first 100 characters
+                    print(f"Debug: Response received: {output_text[:100]}...")  # Print first 100 characters
 
                 # Extract and log stats information
                 stats_info = safe_get_stats_info(result, debug)
@@ -346,7 +362,7 @@ class ExpoLmstudioUnified:
                     except Exception as unload_err:
                         print(f"Warning: Failed to unload model: {unload_err}")
 
-                return (result.content,)
+                return (output_text,)
 
         executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
         try:
@@ -508,9 +524,11 @@ class ExpoLmstudioImageToText:
 
                 result = model_obj.respond(chat, config=config)
 
+                output_text = strip_thinking_tags(result.content)
+
                 if debug:
                     try:
-                        print(f"Debug: Response received: {result.content[:100]}...")
+                        print(f"Debug: Response received: {output_text[:100]}...")
                     except Exception:
                         print("Debug: Response received (unable to slice content)")
 
@@ -527,7 +545,7 @@ class ExpoLmstudioImageToText:
                     except Exception as unload_err:
                         print(f"Warning: Failed to unload model: {unload_err}")
 
-                return (result.content,)
+                return (output_text,)
 
         executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
         try:
@@ -752,8 +770,10 @@ class ExpoLmstudioTextGeneration:
 
                 result = model_obj.respond(chat, config=config)
 
+                output_text = strip_thinking_tags(result.content)
+
                 if debug:
-                    print(f"Debug: Response received: {result.content[:100]}...")  # Print first 100 characters
+                    print(f"Debug: Response received: {output_text[:100]}...")  # Print first 100 characters
 
                 # Extract and log stats information
                 stats_info = safe_get_stats_info(result, debug)
@@ -769,7 +789,7 @@ class ExpoLmstudioTextGeneration:
                     except Exception as unload_err:
                         print(f"Warning: Failed to unload model: {unload_err}")
 
-                return (result.content,)
+                return (output_text,)
 
         executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
         try:
@@ -989,7 +1009,7 @@ class ExpoLmstudioStructuredOutput:
 
                 result = model_obj.respond(chat, config=config)
 
-                json_string = result.content.strip()
+                json_string = strip_thinking_tags(result.content)
 
                 if debug:
                     print(f"Debug: [StructuredOutput] raw response: {json_string[:200]}")
