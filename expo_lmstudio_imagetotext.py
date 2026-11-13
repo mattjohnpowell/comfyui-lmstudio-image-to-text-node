@@ -492,7 +492,7 @@ class ExpoLmstudioImageToText:
         
         if ip_address and port > 0:
             # Legacy HTTP mode detected
-            return self._process_image_legacy_http(image, user_prompt, system_prompt, model_key or model, ip_address, port, seed, max_tokens, temperature, debug)
+            return self._process_image_legacy_http(image, user_prompt, system_prompt, model_key or model, ip_address, port, seed, max_tokens, temperature, debug, timeout_seconds)
         
         # Fail fast if LM Studio is not reachable
         check_lmstudio_connection()
@@ -613,7 +613,7 @@ class ExpoLmstudioImageToText:
                 except Exception as cleanup_err:
                     print(f"Warning: Failed to remove temporary file {temp_path}: {cleanup_err}")
 
-    def _process_image_legacy_http(self, image, user_prompt, system_prompt, model, ip_address, port, seed, max_tokens=1000, temperature=0.7, debug=False):
+    def _process_image_legacy_http(self, image, user_prompt, system_prompt, model, ip_address, port, seed, max_tokens=1000, temperature=0.7, debug=False, timeout_seconds=300):
         """Legacy HTTP-based image processing for backward compatibility"""
         print("Warning: Using legacy HTTP mode. Consider upgrading to SDK mode for better performance.")
         
@@ -673,7 +673,7 @@ class ExpoLmstudioImageToText:
             }
 
             url = f"http://{ip_address}:{port}/v1/chat/completions"
-            response = requests.post(url, json=payload, headers=headers, timeout=60)
+            response = requests.post(url, json=payload, headers=headers, timeout=timeout_seconds)
 
             if debug:
                 print(f"Debug: Server response status code: {response.status_code}")
@@ -761,7 +761,7 @@ class ExpoLmstudioTextGeneration:
         
         if ip_address and port > 0:
             # Legacy HTTP mode detected
-            return self._generate_text_legacy_http(prompt, system_prompt, model_key or model, ip_address, port, seed, max_tokens, temperature, debug)
+            return self._generate_text_legacy_http(prompt, system_prompt, model_key or model, ip_address, port, seed, max_tokens, temperature, debug, timeout_seconds)
         
         # Fail fast if LM Studio is not reachable
         check_lmstudio_connection()
@@ -854,7 +854,7 @@ class ExpoLmstudioTextGeneration:
         finally:
             executor.shutdown(wait=False, cancel_futures=True)
 
-    def _generate_text_legacy_http(self, prompt, system_prompt, model, ip_address, port, seed, max_tokens=1000, temperature=0.7, debug=False):
+    def _generate_text_legacy_http(self, prompt, system_prompt, model, ip_address, port, seed, max_tokens=1000, temperature=0.7, debug=False, timeout_seconds=300):
         """Legacy HTTP-based text generation for backward compatibility"""
         print("Warning: Using legacy HTTP mode. Consider upgrading to SDK mode for better performance.")
         
@@ -897,7 +897,7 @@ class ExpoLmstudioTextGeneration:
             }
 
             url = f"http://{ip_address}:{port}/v1/chat/completions"
-            response = requests.post(url, json=payload, headers=headers, timeout=60)
+            response = requests.post(url, json=payload, headers=headers, timeout=timeout_seconds)
 
             if debug:
                 print(f"Debug: Server response status code: {response.status_code}")
